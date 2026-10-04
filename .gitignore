@@ -1,0 +1,54 @@
+# Environment files
+
+.env
+.env.*
+!.env.example
+
+# Credentials
+
+auth.json
+*.pem
+*.key
+
+# Logs
+
+*.log
+*.sql
+*.sql.gz
+
+# IDE
+
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Operating system
+
+.DS_Store
+Thumbs.db
+
+# Temporary files
+
+*.tmp
+*.bak
+*.swp
+*.orig
+
+# Generated files
+
+var/
+generated/
+pub/static/
+pub/media/
+vendor/
+node_modules/
+
+# Local configuration
+
+app/etc/env.php
+app/etc/config.php
+
+# Test and coverage artifacts
+
+.phpunit.cache/
+coverage/

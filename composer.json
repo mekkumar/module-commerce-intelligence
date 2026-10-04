@@ -1,0 +1,1 @@
+{"name":"kumar/module-commerce-intelligence","description":"Magento 2 Commerce Intelligence admin dashboard","type":"magento2-module","license":"MIT","autoload":{"files":["registration.php"],"psr-4":{"Kumar\\CommerceIntelligence\\":""}}}

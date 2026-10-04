@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd"><system>
+<section id="kumar_commerceintelligence" translate="label" sortOrder="920" showInDefault="1" showInWebsite="1" showInStore="1"><label>Commerce Intelligence</label><tab>kumar</tab><resource>Kumar_CommerceIntelligence::commerce_intelligence</resource>
+<group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1"><label>General</label>
+<field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Commerce Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="default_period" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1"><label>Default Dashboard Period</label><source_model>Kumar\CommerceIntelligence\Model\Config\Source\Period</source_model></field>
+</group>
+<group id="features" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1"><label>Analytics Features</label>
+<field id="sales" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Sales Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="products" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Product Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="customers" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Customer Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="payments" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Payment Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="inventory" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Inventory Intelligence</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+<field id="alerts" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Insights &amp; Alerts</label><source_model>Magento\Config\Model\Config\Source\Yesno</source_model></field>
+</group></section></system></config>

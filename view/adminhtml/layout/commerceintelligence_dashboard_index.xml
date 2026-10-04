@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+
+    <head>
+        <css src="Kumar_CommerceIntelligence::css/dashboard.css"/>
+    </head>
+
+    <body>
+        <referenceContainer name="content">
+            <block
+                class="Kumar\CommerceIntelligence\Block\Adminhtml\Dashboard"
+                name="kumar.commerceintelligence.dashboard"
+                template="Kumar_CommerceIntelligence::dashboard.phtml"/>
+        </referenceContainer>
+    </body>
+
+</page>

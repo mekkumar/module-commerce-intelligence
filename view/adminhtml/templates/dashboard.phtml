@@ -1,0 +1,764 @@
+<?php
+/** @var \Kumar\CommerceIntelligence\Block\Adminhtml\Dashboard $block */
+
+$stats = $block->getStats();
+
+if (!is_array($stats)) {
+    $stats = [];
+}
+
+$stats = array_replace(
+    [
+        'revenue' => 0.0,
+        'orders' => 0,
+        'aov' => 0.0,
+        'customers' => 0,
+        'refunds' => 0.0,
+        'discounts' => 0.0,
+        'payment_distribution' => [],
+        'hero_products' => [],
+        'peak_hours' => [],
+        'revenue_trend' => [],
+        'registered_orders' => 0,
+        'guest_orders' => 0,
+        'repeat_customers' => 0,
+        'order_statuses' => [],
+        'comparison' => []
+    ],
+    $stats
+);
+
+$period = $block->getPeriod();
+
+$revenue = (float)$stats['revenue'];
+$orders = (int)$stats['orders'];
+$aov = (float)$stats['aov'];
+$customers = (int)$stats['customers'];
+$refunds = (float)$stats['refunds'];
+$discounts = (float)$stats['discounts'];
+
+$paymentDistribution = is_array($stats['payment_distribution'])
+    ? $stats['payment_distribution']
+    : [];
+
+$heroProducts = is_array($stats['hero_products'])
+    ? $stats['hero_products']
+    : [];
+
+$peakHours = is_array($stats['peak_hours'])
+    ? $stats['peak_hours']
+    : [];
+
+$revenueTrend = is_array($stats['revenue_trend'])
+    ? $stats['revenue_trend']
+    : [];
+
+$maxTrendRevenue = $block->getMaxTrendRevenue();
+
+$maxPeakOrders = $block->getMaxPeakOrders();
+$comparison = $stats['comparison'];
+$orderStatuses = is_array($stats['order_statuses']) ? $stats['order_statuses'] : [];
+
+$comparisonRevenueChange = $block->getPercentageChange($revenue, (float)($comparison['revenue'] ?? 0));
+$comparisonOrdersChange = $block->getPercentageChange((float)$orders, (float)($comparison['orders'] ?? 0));
+$comparisonAovChange = $block->getPercentageChange($aov, (float)($comparison['aov'] ?? 0));
+
+$refundPercentage = $revenue > 0
+    ? ($refunds / $revenue) * 100
+    : 0;
+
+$discountPercentage = $revenue > 0
+    ? ($discounts / $revenue) * 100
+    : 0;
+?>
+
+<div class="kci-wrap">
+
+    <!-- Header -->
+    <div class="kci-header">
+
+        <div>
+            <h1><?= $block->escapeHtml(__('Commerce Intelligence')) ?></h1>
+
+            <p>
+                <?= $block->escapeHtml(
+                    __('Business performance overview for the selected period.')
+                ) ?>
+            </p>
+        </div>
+
+        <form method="get" class="kci-filter">
+
+            <label for="kci-period">
+                <?= $block->escapeHtml(__('Period')) ?>
+            </label>
+
+            <select
+                name="period"
+                id="kci-period"
+            >
+                <option
+                    value="7"
+                    <?= $period === 7 ? 'selected' : '' ?>
+                >
+                    <?= $block->escapeHtml(__('Last 7 Days')) ?>
+                </option>
+
+                <option
+                    value="30"
+                    <?= $period === 30 ? 'selected' : '' ?>
+                >
+                    <?= $block->escapeHtml(__('Last 30 Days')) ?>
+                </option>
+
+                <option
+                    value="90"
+                    <?= $period === 90 ? 'selected' : '' ?>
+                >
+                    <?= $block->escapeHtml(__('Last 90 Days')) ?>
+                </option>
+                <option
+                    value="365"
+                    <?= $period === 365 ? 'selected' : '' ?>
+                >
+                    <?= $block->escapeHtml(__('Last 365 Days')) ?>
+                </option>
+            </select>
+
+            <button
+                class="action-primary"
+                type="submit"
+            >
+                <?= $block->escapeHtml(__('Apply')) ?>
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Period Information -->
+
+    <div class="kci-period-info">
+
+        <strong>
+            <?= $block->escapeHtml(
+                __('Showing data for the last %1 days', $period)
+            ) ?>
+        </strong>
+
+        <span>
+            <?= $block->escapeHtml(
+                $block->getDateFrom()
+            ) ?>
+
+            →
+
+            <?= $block->escapeHtml(
+                $block->getDateTo()
+            ) ?>
+        </span>
+
+    </div>
+
+
+    <!-- KPI Cards -->
+
+    <div class="kci-grid kpi-grid">
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('Revenue')) ?>
+            </span>
+
+            <strong>
+                <?= $block->escapeHtml(
+                    $block->formatPrice($revenue)
+                ) ?>
+            </strong>
+
+            <small>
+                <?= $block->escapeHtml(
+                    __('Selected period')
+                ) ?>
+            </small>
+
+        </div>
+
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('Orders')) ?>
+            </span>
+
+            <strong>
+                <?= $orders ?>
+            </strong>
+
+            <small>
+                <?= $block->escapeHtml(
+                    __('Non-cancelled orders')
+                ) ?>
+            </small>
+
+        </div>
+
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('AOV')) ?>
+            </span>
+
+            <strong>
+                <?= $block->escapeHtml(
+                    $block->formatPrice($aov)
+                ) ?>
+            </strong>
+
+            <small>
+                <?= $block->escapeHtml(
+                    __('Average Order Value')
+                ) ?>
+            </small>
+
+        </div>
+
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('Customers')) ?>
+            </span>
+
+            <strong>
+                <?= $customers ?>
+            </strong>
+
+            <small>
+                <?= $block->escapeHtml(
+                    __('Registered customers with orders')
+                ) ?>
+            </small>
+
+        </div>
+
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('Refunds')) ?>
+            </span>
+
+            <strong>
+                <?= $block->escapeHtml(
+                    $block->formatPrice($refunds)
+                ) ?>
+            </strong>
+
+            <small>
+                <?= number_format($refundPercentage, 1) ?>%
+                <?= $block->escapeHtml(__('of revenue')) ?>
+            </small>
+
+        </div>
+
+
+        <div class="kci-card kpi-card">
+
+            <span class="kpi-label">
+                <?= $block->escapeHtml(__('Discounts')) ?>
+            </span>
+
+            <strong>
+                <?= $block->escapeHtml(
+                    $block->formatPrice($discounts)
+                ) ?>
+            </strong>
+
+            <small>
+                <?= number_format($discountPercentage, 1) ?>%
+                <?= $block->escapeHtml(__('of revenue')) ?>
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- Period Comparison -->
+    <section class="kci-card kci-comparison-card">
+        <div class="kci-section-header">
+            <div>
+                <h2><?= $block->escapeHtml(__('Period Comparison')) ?></h2>
+                <p><?= $block->escapeHtml(__('Compared with the immediately preceding period of the same length.')) ?></p>
+            </div>
+            <small><?= $block->escapeHtml(($comparison['from'] ?? '') . ' → ' . ($comparison['to'] ?? '')) ?></small>
+        </div>
+        <div class="kci-comparison-grid">
+            <?php foreach ([
+                ['label' => __('Revenue'), 'current' => $revenue, 'previous' => (float)($comparison['revenue'] ?? 0), 'change' => $comparisonRevenueChange, 'formatted' => true],
+                ['label' => __('Orders'), 'current' => $orders, 'previous' => (int)($comparison['orders'] ?? 0), 'change' => $comparisonOrdersChange, 'formatted' => false],
+                ['label' => __('AOV'), 'current' => $aov, 'previous' => (float)($comparison['aov'] ?? 0), 'change' => $comparisonAovChange, 'formatted' => true]
+            ] as $metric): ?>
+                <div class="kci-comparison-item kpi-card">
+                    <span class="kpi-label"><?= $block->escapeHtml($metric['label']) ?></span>
+                    <strong><?= $metric['formatted'] ? $block->escapeHtml($block->formatPrice((float)$metric['current'])) : (int)$metric['current'] ?></strong>
+                    <small>
+                        <?= $block->escapeHtml(__('Previous:')) ?>
+                        <?= $metric['formatted'] ? $block->escapeHtml($block->formatPrice((float)$metric['previous'])) : (int)$metric['previous'] ?>
+                    </small>
+                    <?php if ($metric['change'] === null): ?>
+                        <em><?= $block->escapeHtml(__('No previous-period baseline')) ?></em>
+                    <?php else: ?>
+                        <em class="<?= $metric['change'] > 0 ? 'is-positive' : ($metric['change'] < 0 ? 'is-negative' : '') ?>">
+                            <?= $metric['change'] > 0 ? '+' : '' ?><?= number_format((float)$metric['change'], 1) ?>%
+                            <?= $block->escapeHtml(__('vs previous period')) ?>
+                        </em>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Revenue Trend -->
+
+    <div class="kci-grid two">
+
+        <section class="kci-card">
+
+            <div class="kci-section-header">
+
+                <div>
+                    <h2>
+                        <?= $block->escapeHtml(__('Revenue Trend')) ?>
+                    </h2>
+
+                    <p>
+                        <?= $block->escapeHtml(
+                            __('Daily revenue for the selected period.')
+                        ) ?>
+                    </p>
+                </div>
+
+            </div>
+
+
+            <?php if ($maxTrendRevenue > 0): ?>
+
+                <?php
+                $chartWidth = 1000;
+                $chartHeight = 250;
+                $chartLeft = 30;
+                $chartRight = 20;
+                $chartTop = 20;
+                $chartBottom = 45;
+                $plotWidth = $chartWidth - $chartLeft - $chartRight;
+                $plotHeight = $chartHeight - $chartTop - $chartBottom;
+                $pointCount = count($revenueTrend);
+                $chartPoints = [];
+                foreach ($revenueTrend as $index => $trend):
+                    $x = $pointCount > 1 ? $chartLeft + ($index / ($pointCount - 1)) * $plotWidth : $chartLeft + ($plotWidth / 2);
+                    $y = $chartTop + $plotHeight - (((float)$trend['revenue'] / $maxTrendRevenue) * $plotHeight);
+                    $chartPoints[] = [
+                        'x' => $x,
+                        'y' => $y,
+                        'label' => $trend['label'],
+                        'date' => $trend['date'],
+                        'revenue' => (float)$trend['revenue']
+                    ];
+                endforeach;
+                $polylinePoints = implode(' ', array_map(static function (array $point): string {
+                    return number_format($point['x'], 2, '.', '') . ',' . number_format($point['y'], 2, '.', '');
+                }, $chartPoints));
+                $labelStep = max(1, (int)ceil($pointCount / 7));
+                ?>
+                <div class="kci-line-chart-wrap">
+                    <svg class="kci-line-chart" viewBox="0 0 1000 250" role="img" aria-label="<?= $block->escapeHtmlAttr(__('Daily revenue trend')) ?>" preserveAspectRatio="none">
+                        <?php for ($grid = 0; $grid <= 4; $grid++): ?>
+                            <?php $gridY = $chartTop + ($plotHeight / 4) * $grid; ?>
+                            <line x1="<?= $chartLeft ?>" y1="<?= number_format($gridY, 2, '.', '') ?>" x2="<?= $chartWidth - $chartRight ?>" y2="<?= number_format($gridY, 2, '.', '') ?>" class="kci-chart-gridline" />
+                        <?php endfor; ?>
+                        <?php if (count($chartPoints) > 1): ?>
+                            <polyline points="<?= $block->escapeHtmlAttr($polylinePoints) ?>" class="kci-chart-area-line" />
+                        <?php endif; ?>
+                        <?php foreach ($chartPoints as $index => $point): ?>
+                            <circle cx="<?= number_format($point['x'], 2, '.', '') ?>" cy="<?= number_format($point['y'], 2, '.', '') ?>" r="<?= $pointCount <= 30 ? 4 : 2.5 ?>" class="kci-chart-point">
+                                <title><?= $block->escapeHtml($point['date'] . ' · ' . $block->formatPrice($point['revenue'])) ?></title>
+                            </circle>
+                            <?php if ($index % $labelStep === 0 || $index === $pointCount - 1): ?>
+                                <text x="<?= number_format($point['x'], 2, '.', '') ?>" y="235" text-anchor="middle" class="kci-chart-label"><?= $block->escapeHtml($point['label']) ?></text>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </svg>
+                </div>
+
+            <?php else: ?>
+
+                <div class="kci-empty">
+                    <?= $block->escapeHtml(
+                        __('No order data found for this period.')
+                    ) ?>
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
+
+        <!-- Payment Distribution -->
+
+        <section class="kci-card">
+
+            <h2>
+                <?= $block->escapeHtml(__('Payment Distribution')) ?>
+            </h2>
+
+            <?php if ($paymentDistribution): ?>
+
+                <div class="payment">
+
+                    <?php foreach ($paymentDistribution as $method => $payment): ?>
+
+                        <div class="payment-row">
+
+                            <div class="payment-name">
+
+                                <b>
+                                    <?= $block->escapeHtml(
+                                        $block->getPaymentLabel($method)
+                                    ) ?>
+                                </b>
+
+                                <small>
+                                    <?= $block->escapeHtml(
+                                        $block->formatPrice(
+                                            (float)$payment['amount']
+                                        )
+                                    ) ?>
+                                </small>
+
+                            </div>
+
+                            <span>
+                                <?= number_format(
+                                    (float)$payment['percentage'],
+                                    1
+                                ) ?>%
+                            </span>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php else: ?>
+
+                <div class="kci-empty">
+                    <?= $block->escapeHtml(
+                        __('No payment data found for this period.')
+                    ) ?>
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
+    </div>
+
+
+    <!-- Hero Products / Peak Hours -->
+
+    <div class="kci-grid two">
+
+        <!-- Hero Products -->
+
+        <section class="kci-card">
+
+            <h2>
+                <?= $block->escapeHtml(__('Hero Products')) ?>
+            </h2>
+
+            <?php if ($heroProducts): ?>
+
+                <div class="table-responsive">
+
+                    <table class="data-grid">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    <?= $block->escapeHtml(__('Product')) ?>
+                                </th>
+
+                                <th>
+                                    <?= $block->escapeHtml(__('SKU')) ?>
+                                </th>
+
+                                <th>
+                                    <?= $block->escapeHtml(__('Orders')) ?>
+                                </th>
+
+                                <th>
+                                    <?= $block->escapeHtml(__('Qty')) ?>
+                                </th>
+
+                                <th>
+                                    <?= $block->escapeHtml(__('Revenue')) ?>
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <?php foreach ($heroProducts as $product): ?>
+
+                                <tr>
+
+                                    <td>
+                                        <?= $block->escapeHtml(
+                                            $product['name']
+                                        ) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= $block->escapeHtml(
+                                            $product['sku']
+                                        ) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= (int)$product['orders'] ?>
+                                    </td>
+
+                                    <td>
+                                        <?= number_format(
+                                            (float)$product['qty'],
+                                            0
+                                        ) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= $block->escapeHtml(
+                                            $block->formatPrice(
+                                                (float)$product['revenue']
+                                            )
+                                        ) ?>
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            <?php else: ?>
+
+                <div class="kci-empty">
+                    <?= $block->escapeHtml(
+                        __('No product sales found for this period.')
+                    ) ?>
+                </div>
+
+            <?php endif; ?>
+
+        </section>
+
+
+        <!-- Peak Hours -->
+
+        <section class="kci-card">
+
+            <h2>
+                <?= $block->escapeHtml(__('Peak Hours')) ?>
+            </h2>
+
+            <p class="kci-description">
+                <?= $block->escapeHtml(
+                    __('Orders grouped by order creation hour.')
+                ) ?>
+            </p>
+
+            <div class="hours">
+
+                <?php foreach ($peakHours as $hour => $count): ?>
+
+                    <?php
+                    if ($count <= 0) {
+                        continue;
+                    }
+
+                    $width = ($count / $maxPeakOrders) * 100;
+
+                    $timeLabel = sprintf(
+                        '%02d:00',
+                        $hour
+                    );
+                    ?>
+
+                    <div class="hour-row">
+
+                        <span>
+                            <?= $block->escapeHtml($timeLabel) ?>
+                        </span>
+
+                        <i
+                            style="width: <?= number_format($width, 2) ?>%"
+                        ></i>
+
+                        <b>
+                            <?= (int)$count ?>
+                        </b>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- Customer and Order Intelligence -->
+    <div class="kci-grid two">
+        <section class="kci-card">
+            <h2><?= $block->escapeHtml(__('Customer Intelligence')) ?></h2>
+            <p class="kci-description"><?= $block->escapeHtml(__('Customer and checkout mix within the selected period.')) ?></p>
+            <div class="kci-stat-list">
+                <div><span><?= $block->escapeHtml(__('Registered customer orders')) ?></span><strong><?= (int)$stats['registered_orders'] ?></strong></div>
+                <div><span><?= $block->escapeHtml(__('Guest orders')) ?></span><strong><?= (int)$stats['guest_orders'] ?></strong></div>
+                <div><span><?= $block->escapeHtml(__('Registered customers')) ?></span><strong><?= $customers ?></strong></div>
+                <div><span><?= $block->escapeHtml(__('Repeat purchasers in this period')) ?></span><strong><?= (int)$stats['repeat_customers'] ?></strong></div>
+            </div>
+            <small class="kci-note"><?= $block->escapeHtml(__('Repeat purchasers are registered customers who placed more than one order during this selected period.')) ?></small>
+        </section>
+
+        <section class="kci-card">
+            <h2><?= $block->escapeHtml(__('Order Status Distribution')) ?></h2>
+            <p class="kci-description"><?= $block->escapeHtml(__('All orders created during the selected period, including cancelled orders.')) ?></p>
+            <?php if ($orderStatuses): ?>
+                <div class="kci-status-list">
+                    <?php $statusTotal = array_sum($orderStatuses); ?>
+                    <?php foreach ($orderStatuses as $status => $count): ?>
+                        <?php $statusWidth = $statusTotal > 0 ? ($count / $statusTotal) * 100 : 0; ?>
+                        <div class="kci-status-row">
+                            <div><span><?= $block->escapeHtml($block->getStatusLabel((string)$status)) ?></span><strong><?= (int)$count ?></strong></div>
+                            <i><b style="width: <?= number_format($statusWidth, 2, '.', '') ?>%"></b></i>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="kci-empty"><?= $block->escapeHtml(__('No order status data found for this period.')) ?></div>
+            <?php endif; ?>
+        </section>
+    </div>
+
+    <!-- Business Insights -->
+
+    <div class="kci-grid two">
+
+        <section class="kci-card">
+
+            <h2>
+                <?= $block->escapeHtml(__('Inventory / Sales Signals')) ?>
+            </h2>
+
+            <div class="insight">
+
+                <?= $block->escapeHtml(
+                    __('Orders in selected period: %1', $orders)
+                ) ?>
+
+            </div>
+
+            <div class="insight">
+
+                <?= $block->escapeHtml(
+                    __('Revenue in selected period: %1', $block->formatPrice($revenue))
+                ) ?>
+
+            </div>
+
+            <div class="insight">
+
+                <?= $block->escapeHtml(
+                    __('Top selling products shown above are based on product revenue.')
+                ) ?>
+
+            </div>
+
+        </section>
+
+
+        <section class="kci-card">
+
+            <h2>
+                <?= $block->escapeHtml(__('Business Insights')) ?>
+            </h2>
+
+            <?php if ($paymentDistribution): ?>
+
+                <?php
+                $topPayment = reset($paymentDistribution);
+                $topPaymentCode = key($paymentDistribution);
+                ?>
+
+                <div class="insight">
+
+                    <?= $block->escapeHtml(
+                        __(
+                            '%1 generated the largest payment revenue share.',
+                            $block->getPaymentLabel($topPaymentCode)
+                        )
+                    ) ?>
+
+                </div>
+
+            <?php endif; ?>
+
+
+            <?php if ($heroProducts): ?>
+
+                <div class="insight">
+
+                    <?= $block->escapeHtml(
+                        __(
+                            '%1 is the leading product by revenue.',
+                            $heroProducts[0]['name']
+                        )
+                    ) ?>
+
+                </div>
+
+            <?php endif; ?>
+
+
+            <div class="insight">
+
+                <?= $block->escapeHtml(
+                    __(
+                        'Refunds represent %1% of revenue for the selected period.',
+                        number_format($refundPercentage, 1)
+                    )
+                ) ?>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
